@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>දේපළ සහ ගැණුම්කරුවන්</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--ink:#14181f;--blue:#17306b;--mute:#5d6675;--line:#e1e4ea;--wa:#1faa59}
+@media(prefers-color-scheme:dark){:root{--bg:#12151b;--card:#1b2029;--ink:#eef0f4;--blue:#9db6f2;--mute:#9aa3b2;--line:#2b3240}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Noto Sans Sinhala",system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:16px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+h1{font-size:20px;margin:0;color:var(--blue)}
+button,input,select,textarea{font:inherit;color:inherit}
+.btn{border:1px solid var(--line);background:var(--card);padding:8px 14px;border-radius:8px;cursor:pointer;min-height:40px}
+.btn:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.wa{background:var(--wa);border-color:var(--wa);color:#fff;text-decoration:none;display:inline-flex;align-items:center}
+.btn.dr{color:var(--blue);text-decoration:none;display:inline-flex;align-items:center}
+@media(prefers-color-scheme:dark){.btn.pri{color:#0d1424}}
+#q{width:100%;margin:12px 0;padding:16px 18px;font-size:18px;border:2px solid var(--line);border-radius:12px;background:var(--card)}
+#q:focus{border-color:var(--blue);outline:none}
+#st{font-size:13px;color:var(--mute);margin-top:8px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.tab{flex:1 1 40%;padding:12px;border:0;border-bottom:3px solid var(--line);background:none;font-weight:600;color:var(--mute);cursor:pointer}
+.tab[aria-selected=true]{color:var(--blue);border-color:var(--blue)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+.card h3{margin:0 0 2px;font-size:17px}
+.meta{color:var(--mute);font-size:14px}
+.tag{display:inline-block;background:var(--bg);border-radius:6px;padding:1px 8px;font-size:13px;color:var(--blue);margin-right:6px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.th{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.th img{width:72px;height:72px;object-fit:cover;border-radius:8px;cursor:zoom-in;border:1px solid var(--line)}
+.empty{text-align:center;color:var(--mute);padding:32px 0}
+dialog{border:0;border-radius:14px;padding:20px;width:min(520px,92vw);background:var(--card);color:var(--ink);max-height:92vh}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+label{display:block;font-size:14px;color:var(--mute);margin-top:10px}
+input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.row{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+#lb img{max-width:100%;max-height:80vh;display:block;margin:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>දේපළ සහ ගැණුම්කරුවන්</h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn pri" id="add">+ අලුතින්</button>
+      <button class="btn" id="drv">Google Drive</button>
+      <button class="btn" id="exp">Backup</button>
+      <button class="btn" id="imp">Import</button>
+      <input type="file" id="file" accept=".json" hidden>
+    </div>
+  </div>
+  <div id="st">Drive: සම්බන්ධ කර නැත</div>
+  <input id="q" type="search" placeholder="සොයන්න: ප්‍රදේශය, නම, දුරකථන අංකයේ අග ඉලක්කම්..." autocomplete="off">
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="t-p" aria-selected="true">දේපළ ලැයිස්තුව</button>
+    <button class="tab" role="tab" id="t-b" aria-selected="false">ගැණුම්කරුවන්</button>
+    <button class="tab" role="tab" id="t-r" aria-selected="false">කුලී නිවාස අවශ්‍ය අය</button>
+    <button class="tab" role="tab" id="t-o" aria-selected="false">අයිතිකරුවන්</button>
+  </div>
+  <div id="list"></div>
+</div>
+
+<dialog id="dlg"><div id="form"></div></dialog>
+<dialog id="lb"><img alt=""><div class="row"><button class="btn" onclick="document.getElementById('lb').close()">වසන්න</button></div></dialog>
+<dialog id="dd">
+  <h3 style="margin:0;color:var(--blue)">Google Drive Sync</h3>
+  <p class="meta">ගිණුම: imeshahgamage@gmail.com<br>දත්ත සහ ඡායාරූප Drive හි "PropertyLeads" folder එකේ සුරැකේ.</p>
+  <label>Google OAuth Client ID<input id="cid" placeholder="xxxx.apps.googleusercontent.com"></label>
+  <div class="row"><button class="btn" id="dx">වසන්න</button><button class="btn pri" id="dgo">Sign in සහ Sync</button></div>
+</dialog>
+
+<script>
+var EMAIL='imeshahgamage@gmail.com',DATA='property-leads-data.json',TABS=['p','b','r','o'];
+var S={p:[],b:[],r:[],o:[]},tab='p',token=null,tokenExp=0,pt;
+var folderId=localStorage.getItem('plFolder'),dataId=localStorage.getItem('plDataId');
+function $(i){return document.getElementById(i)}
+function st(t){$('st').textContent=t}
+function norm(d){return {p:d.p||[],b:d.b||[],r:d.r||[],o:d.o||[]}}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+/* ---------- local storage (IndexedDB) ---------- */
+function idb(){return new Promise(function(res,rej){var r=indexedDB.open('propLeads',1);r.onupgradeneeded=function(){r.result.createObjectStore('kv')};r.onsuccess=function(){res(r.result)};r.onerror=function(){rej(r.error)}})}
+function kvGet(k){return idb().then(function(d){return new Promise(function(res){var q=d.transaction('kv').objectStore('kv').get(k);q.onsuccess=function(){res(q.result)};q.onerror=function(){res()}})})}
+function kvSet(k,v){return idb().then(function(d){return new Promise(function(res){var t=d.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=res;t.onerror=res})}).catch(function(){})}
+function save(){kvSet('data',S);clearTimeout(pt);pt=setTimeout(push,2500)}
+/* ---------- helpers ---------- */
+function intl(n){var d=String(n||'').replace(/\D/g,'');if(d.indexOf('94')===0&&d.length>=11)return d;if(d.charAt(0)==='0')d=d.slice(1);return '94'+d}
+function wa(x,isP){
+  var m=isP?'හෙලෝ, ඔබ විමසූ '+(x.type||'දේපළ')+' ('+(x.area||'')+') පිළිබඳ විස්තර සහ ඡායාරූප මෙන්න...'+(x.drive?'\n'+x.drive:'')
+  :(tab==='o'?'හෙලෝ '+(x.name||'')+', ඔබේ '+(x.want||'දේපළ')+' පිළිබඳව කතා කිරීමට කැමතියි.':'හෙලෝ '+(x.name||'')+', ඔබ විමසූ '+(x.want||'දේපළ')+' පිළිබඳ විස්තර මෙන්න...');
+  return 'https://wa.me/'+intl(x.phone)+'?text='+encodeURIComponent(m);
+}
+function shrink(file){return new Promise(function(res){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,1000/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.72))};im.onerror=function(){res(null)};im.src=r.result};r.readAsDataURL(file)})}
+/* ---------- render ---------- */
+function render(){
+  var q=$('q').value.trim().toLowerCase(),isP=tab==='p';
+  var items=S[tab].filter(function(x){return !q||JSON.stringify(x,function(k,v){return k==='photos'?undefined:v}).toLowerCase().indexOf(q)>-1});
+  $('list').innerHTML=items.map(function(x){
+    var title=isP?esc((x.type||'දේපළ')+' - '+(x.area||'')):esc(x.name);
+    var line=isP?'<span class="tag">'+esc(x.status)+'</span>'+(x.price?'රු. '+esc(x.price):''):(x.want?'<span class="tag">'+esc(x.want)+'</span>':'')+(x.budget?'අයවැය: රු. '+esc(x.budget):'');
+    return '<div class="card"><h3>'+title+'</h3><div class="meta">'+(isP?esc(x.owner)+' · ':(x.area?esc(x.area)+' · ':''))+esc(x.phone)+'</div>'+
+    '<div style="margin-top:8px">'+line+'</div>'+(x.notes?'<div class="meta" style="margin-top:6px">'+esc(x.notes)+'</div>':'')+
+    ((x.photos||[]).length?'<div class="th">'+x.photos.map(function(s){return '<img src="'+s+'" alt="ඡායාරූපය">'}).join('')+'</div>':'')+
+    '<div class="acts">'+(x.phone?'<a class="btn wa" target="_blank" rel="noopener" href="'+wa(x,isP)+'">WhatsApp</a>':'')+
+    ((isP||tab==='o')&&x.drive?'<a class="btn dr" target="_blank" rel="noopener" href="'+esc(x.drive)+'">Google Drive Photos</a>':'')+
+    '<button class="btn" data-e="'+x.id+'">සංස්කරණය</button><button class="btn" data-d="'+x.id+'">මකන්න</button></div></div>';
+  }).join('')||'<div class="empty">'+(q?'ගැලපෙන දත්ත නැත.':'තවම කිසිවක් නැත. ඉහළ බොත්තමෙන් එක් කරන්න.')+'</div>';
+}
+function openForm(id){
+  var isP=tab==='p',x=S[tab].filter(function(i){return i.id===id})[0]||{},ph=(x.photos||[]).slice();
+  var f=isP?[['type','වර්ගය (ඉඩම / නිවස / කුලී)'],['area','ප්‍රදේශය'],['price','මිල'],['status','තත්ත්වය (විකිණීමට / කුලියට)'],['owner','හිමිකරුගේ නම'],['phone','දුරකථන (077...)'],['drive','Google Drive ලින්ක් එක (අමතර)'],['notes','සටහන්']]:
+  (tab==='o'?[['name','අයිතිකරුගේ නම'],['phone','දුරකථන (077...)'],['area','ප්‍රදේශය'],['want','දේපළ විස්තරය'],['drive','Google Drive ලින්ක් එක (අමතර)'],['notes','සටහන්']]:
+  [['name','නම'],['phone','දුරකථන (077...)'],['want',tab==='r'?'අවශ්‍ය කුලී නිවස (කාමර ගණන ආදිය)':'අවශ්‍ය දේ'],['area','ප්‍රදේශය'],['budget',tab==='r'?'කුලී අයවැය':'අයවැය'],['notes','සටහන්']]);
+  $('form').innerHTML='<h3 style="margin:0;color:var(--blue)">'+({p:'දේපළ',b:'ගැණුම්කරු',r:'කුලී නිවාස අවශ්‍ය අය',o:'අයිතිකරු'}[tab])+'</h3>'+
+  f.map(function(k){return '<label>'+k[1]+'<input name="'+k[0]+'" value="'+esc(x[k[0]])+'"></label>'}).join('')+
+  '<label>ඡායාරූප එක් කරන්න<input type="file" id="ph" accept="image/*" multiple></label><div class="th" id="thumbs"></div>'+
+  '<div class="row"><button class="btn" id="cx">අවලංගු</button><button class="btn pri" id="sv">සුරකින්න</button></div>';
+  function th(){$('thumbs').innerHTML=ph.map(function(s,i){return '<span style="position:relative"><img src="'+s+'" alt=""><button class="btn" data-x="'+i+'" style="position:absolute;top:-6px;right:-6px;min-height:0;padding:0 7px">×</button></span>'}).join('')}
+  th();
+  $('thumbs').onclick=function(e){var b=e.target.closest('button');if(b){ph.splice(+b.dataset.x,1);th()}};
+  $('ph').onchange=function(e){Promise.all([].map.call(e.target.files,shrink)).then(function(a){a.forEach(function(s){if(s)ph.push(s)});th();e.target.value=''})};
+  $('dlg').showModal();
+  $('cx').onclick=function(){$('dlg').close()};
+  $('sv').onclick=function(){
+    var o=x.id?x:{id:Date.now()};
+    document.querySelectorAll('#form input[name]').forEach(function(i){o[i.name]=i.value.trim()});
+    o.photos=ph;if(!x.id)S[tab].unshift(o);
+    save();render();$('dlg').close();
+  };
+}
+$('q').oninput=render;
+$('add').onclick=function(){openForm(null)};
+TABS.forEach(function(t){$('t-'+t).onclick=function(){tab=t;TABS.forEach(function(k){$('t-'+k).setAttribute('aria-selected',k===t)});render()}});
+$('list').onclick=function(e){
+  if(e.target.tagName==='IMG'){$('lb').querySelector('img').src=e.target.src;$('lb').showModal();return}
+  var b=e.target.closest('button');if(!b)return;
+  if(b.dataset.e)openForm(Number(b.dataset.e));
+  if(b.dataset.d&&confirm('මෙය මකන්නද?')){S[tab]=S[tab].filter(function(i){return i.id!==Number(b.dataset.d)});save();render()}
+};
+$('exp').onclick=function(){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='backup-'+new Date().toISOString().slice(0,10)+'.json';a.click()};
+$('imp').onclick=function(){$('file').click()};
+$('file').onchange=function(e){var r=new FileReader();r.onload=function(){try{S=norm(JSON.parse(r.result));save();render()}catch(x){alert('ගොනුව වලංගු නැත.')}};if(e.target.files[0])r.readAsText(e.target.files[0])};
+/* ---------- Google Drive ---------- */
+function api(url,opt){opt=opt||{};opt.headers=Object.assign({Authorization:'Bearer '+token},opt.headers||{});return fetch(url,opt).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r})}
+function signIn(){return new Promise(function(res,rej){
+  var cid=localStorage.getItem('plCid');
+  if(!cid)return rej(new Error('Client ID නැත'));
+  if(!window.google||!google.accounts)return rej(new Error('Google script පූරණය වී නැත (Internet / https පරීක්ෂා කරන්න)'));
+  google.accounts.oauth2.initTokenClient({client_id:cid,scope:'https://www.googleapis.com/auth/drive.file',login_hint:EMAIL,
+    callback:function(r){if(r.access_token){token=r.access_token;tokenExp=Date.now()+(r.expires_in-60)*1000;res()}else rej(new Error(r.error||'auth'))},
+    error_callback:function(e){rej(new Error(e.type||'auth'))}}).requestAccessToken({prompt:''});
+})}
+function ensure(){
+  var p=folderId?Promise.resolve():api('https://www.googleapis.com/drive/v3/files?fields=files(id)&q='+encodeURIComponent("name='PropertyLeads' and mimeType='application/vnd.google-apps.folder' and trashed=false")).then(function(r){return r.json()}).then(function(j){
+    if(j.files.length)return j.files[0].id;
+    return api('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'PropertyLeads',mimeType:'application/vnd.google-apps.folder'})}).then(function(r){return r.json()}).then(function(j){return j.id})
+  }).then(function(id){folderId=id;localStorage.setItem('plFolder',id)});
+  return p.then(function(){if(dataId)return;
+    return api('https://www.googleapis.com/drive/v3/files?fields=files(id)&q='+encodeURIComponent("name='"+DATA+"' and '"+folderId+"' in parents and trashed=false")).then(function(r){return r.json()}).then(function(j){if(j.files.length){dataId=j.files[0].id;localStorage.setItem('plDataId',dataId)}})})
+}
+function push(){
+  if(!token||Date.now()>=tokenExp){if(localStorage.getItem('plCid'))st('Drive: නැවත Sign in වන්න (Google Drive බොත්තම)');return Promise.resolve()}
+  st('Drive එකට සුරකිමින්...');
+  return ensure().then(function(){
+    var meta={name:DATA};if(!dataId)meta.parents=[folderId];
+    var fd=new FormData();fd.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));fd.append('file',new Blob([JSON.stringify(S)],{type:'application/json'}));
+    return api('https://www.googleapis.com/upload/drive/v3/files'+(dataId?'/'+dataId:'')+'?uploadType=multipart&fields=id',{method:dataId?'PATCH':'POST',body:fd});
+  }).then(function(r){return r.json()}).then(function(j){dataId=j.id;localStorage.setItem('plDataId',dataId);st('Drive එකට සුරැකුණා ✓ '+new Date().toLocaleTimeString())}).catch(function(e){st('Drive දෝෂය: '+e.message)});
+}
+$('drv').onclick=function(){$('cid').value=localStorage.getItem('plCid')||'';$('dd').showModal()};
+$('dx').onclick=function(){$('dd').close()};
+$('dgo').onclick=function(){
+  localStorage.setItem('plCid',$('cid').value.trim());$('dd').close();st('Google සමඟ සම්බන්ධ වෙමින්...');
+  signIn().then(ensure).then(function(){return dataId?api('https://www.googleapis.com/drive/v3/files/'+dataId+'?alt=media').then(function(r){return r.json()}):null}).then(function(d){
+    var has=TABS.some(function(k){return S[k].length});
+    if(d&&(!has||confirm('Drive එකේ දත්ත ඇත.\nOK = Drive එකේ දත්ත මෙයට ගන්න.\nCancel = මෙහි ඇති දත්ත Drive එකට යවන්න.'))){S=norm(d);kvSet('data',S);render();st('Drive එකෙන් දත්ත ගත්තා ✓')}
+    else return push();
+  }).catch(function(e){st('Drive දෝෂය: '+e.message)});
+};
+/* ---------- start ---------- */
+kvGet('data').then(function(d){if(!d){try{d=JSON.parse(localStorage.getItem('propLeadsV1'))}catch(e){}}if(d)S=norm(d);render()}).catch(render);
+render();
+</script>
+</body>
+</html>
